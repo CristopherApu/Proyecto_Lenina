@@ -1,0 +1,74 @@
+/*ServoMotor - 4.8v a 6v
+VálvulaDeAgua - 3v a 4.5v
+HC-SR04 - 5v
+WaterSensor - 3.3v a 5v
+*/
+//---------------------------------------------------------------------
+#include <Servo.h>
+#define echoPin D1
+#define trigPin D0
+#define valvulaPin D8
+//---------------------------------------------------------------------
+int servoPin = D7;
+Servo comida;
+long duracion;
+int distancia;
+int ws = D5;
+int valorws = 0;
+//---------------------------------------------------------------------
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(valvulaPin, OUTPUT);
+  comida.attach(servoPin);
+  comida.write(0);
+  Serial.begin(9600);
+}
+//---------------------------------------------------------------------
+void loop() {
+  //inicializacion();
+  analisis_de_platos();
+   if(valorws <= 10){
+    dar_agua();
+    }else {
+     Serial.println("Hay suficiente agua almacenada en el plato");
+     }
+   if(distancia>15){
+    dar_comida();
+    }
+    else {
+     Serial.println("Hay suficiente alimento almacenado en el plato");
+     }
+     Serial.print(distancia);
+     Serial.println(" cm");
+     Serial.print(valorws);
+     Serial.println(" agua");
+   delay(10000);
+}
+//---------------------------------------------------------------------
+void inicializacion(){
+  comida.write(0);
+  Serial.write(0x0d);
+  delay (2);
+}
+void analisis_de_platos(){
+  valorws = analogRead(ws);
+  digitalWrite(trigPin, LOW);
+  digitalWrite(trigPin, HIGH);
+  delay (10);
+  digitalWrite(trigPin, LOW);
+  duracion = pulseIn(echoPin, HIGH);
+  distancia = duracion * 0.034 / 2;
+}
+void dar_agua(){
+  digitalWrite(valvulaPin, HIGH);
+  delay (300);
+  digitalWrite(valvulaPin, LOW);
+}
+void dar_comida(){
+  comida.write(0);
+  delay(500);
+  comida.write(180);
+  delay(5000);
+  comida.write(0);
+}
