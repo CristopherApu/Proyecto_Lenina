@@ -1,0 +1,187 @@
+/*ServoMotor - 4.8v a 6v
+VálvulaDeAgua - 3v a 4.5v
+HC-SR04 - 5v
+WaterSensor - 3.3v a 5v
+*/
+//---------------------------------------------------------------------
+#include <Servo.h>
+#define valvulaPin D8
+/*#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>*/
+//---------------------------------------------------------------------
+const int trigPin = D0;
+const int echoPin = D1;
+int servoPin = D7;
+Servo comida;
+long duracion;
+int distancia;
+int ws = D5;
+int valorws = 0;
+/*const char* ssid = "iPhone de Cristopher";
+const char* password = "stalinelpadre";
+String tobesend;*/
+//---------------------------------------------------------------------
+void setup() {
+  Serial.begin(115200);
+  delay(100);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(valvulaPin, OUTPUT);
+  comida.attach(servoPin);
+  comida.write(0);
+  /*Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(".");
+    }
+  Serial.println("");
+  Serial.println("WiFi connected");  
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());*/
+  Serial.begin(9600);
+}
+//---------------------------------------------------------------------
+void loop() {
+  //inicializacion();
+  analisis_de_platos();
+   if(valorws <= 300){
+    if(valorws <= 10){
+      dar_agua10();
+      } else {
+        dar_agua5();
+        }
+    //di_agua();
+    }else {
+     Serial.println("Hay suficiente agua almacenada en el plato");
+     //hay_agua();
+     }
+   if(distancia > 30){
+    dar_comida();
+    //di_comida();
+    }
+    else {
+     Serial.println("Hay suficiente alimento almacenado en el plato");
+     //hay_comida();
+     }
+     Serial.print(distancia);
+     Serial.println(" cm");
+     Serial.print(valorws);
+     Serial.println(" agua");
+   delay(28800000);
+}
+//---------------------------------------------------------------------
+void inicializacion(){
+  comida.write(0);
+  Serial.write(0x0d);
+  delay (2);
+}
+void analisis_de_platos(){
+  valorws = analogRead(ws);
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duracion = pulseIn(echoPin, HIGH);
+  distancia = (duracion * 0.034) / 2;
+}
+void dar_agua10(){
+  digitalWrite(valvulaPin, HIGH);
+  delay (10000);
+  digitalWrite(valvulaPin, LOW);
+}
+void dar_agua5(){
+  digitalWrite(valvulaPin, HIGH);
+  delay (5000);
+  digitalWrite(valvulaPin, LOW);
+}
+void dar_comida(){
+  comida.write(0);
+  delay(500);
+  comida.write(180);
+  delay(400);
+  comida.write(0);
+}
+/*void di_agua(){
+  Serial.print("connecting to ");
+      Serial.println("whatsapp");
+      WiFiClient client;
+      HTTPClient http; //Declare an object of class HTTPClient
+      //Specify request destination
+      tobesend = "http://api.callmebot.com/whatsapp.php?";
+      tobesend = tobesend + "phone=+56930680234";
+      tobesend = tobesend + "&text=Acabo+de+darle+agua+a+Lenina.";
+      tobesend = tobesend + "&apikey=3004798";
+      http.begin(client,tobesend); 
+      int httpCode = http.GET(); //Send the request
+      if (httpCode > 0) 
+          { 
+           //Check the returning code
+           String payload = http.getString(); //Get the request response payload
+           Serial.println(payload); //Print the response payload
+          }
+      http.end(); //Close connection
+  }
+void hay_agua(){
+  Serial.print("connecting to ");
+      Serial.println("whatsapp");
+      WiFiClient client;
+      HTTPClient http; //Declare an object of class HTTPClient
+      //Specify request destination
+      tobesend = "http://api.callmebot.com/whatsapp.php?";
+      tobesend = tobesend + "phone=+56930680234";
+      tobesend = tobesend + "&text=El+recipiente+de+Lenina+ya+tiene+agua.";
+      tobesend = tobesend + "&apikey=3004798";
+      http.begin(client,tobesend); 
+      int httpCode = http.GET(); //Send the request
+      if (httpCode > 0) 
+          { 
+           //Check the returning code
+           String payload = http.getString(); //Get the request response payload
+           Serial.println(payload); //Print the response payload
+          }
+      http.end(); //Close connection
+      }
+void di_comida(){
+  Serial.print("connecting to ");
+      Serial.println("whatsapp");
+      WiFiClient client;
+      HTTPClient http; //Declare an object of class HTTPClient
+      //Specify request destination
+      tobesend = "http://api.callmebot.com/whatsapp.php?";
+      tobesend = tobesend + "phone=+56930680234";
+      tobesend = tobesend + "&text=Acabo+de+darle+comida+a+Lenina.";
+      tobesend = tobesend + "&apikey=3004798";
+      http.begin(client,tobesend); 
+      int httpCode = http.GET(); //Send the request
+      if (httpCode > 0) 
+          { 
+           //Check the returning code
+           String payload = http.getString(); //Get the request response payload
+           Serial.println(payload); //Print the response payload
+          }
+      http.end(); //Close connection
+  }
+void hay_comida(){
+  Serial.print("connecting to ");
+      Serial.println("whatsapp");
+      WiFiClient client;
+      HTTPClient http; //Declare an object of class HTTPClient
+      //Specify request destination
+      tobesend = "http://api.callmebot.com/whatsapp.php?";
+      tobesend = tobesend + "phone=+56930680234";
+      tobesend = tobesend + "&text=El+recipiente+de+Lenina+ya+tiene+comida.";
+      tobesend = tobesend + "&apikey=3004798";
+      http.begin(client,tobesend); 
+      int httpCode = http.GET(); //Send the request
+      if (httpCode > 0) 
+          { 
+           //Check the returning code
+           String payload = http.getString(); //Get the request response payload
+           Serial.println(payload); //Print the response payload
+          }
+      http.end(); //Close connection
+}*/
